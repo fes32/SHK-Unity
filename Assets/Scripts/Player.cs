@@ -7,18 +7,42 @@ public class Player : MonoBehaviour
 
     private void Update()
     {
-        float _currentSpeed = _speed * Time.deltaTime;
-
-        if (Input.GetKey(KeyCode.W))
-            transform.Translate(0, _currentSpeed, 0);
-
-        if (Input.GetKey(KeyCode.S))
-            transform.Translate(0, -_currentSpeed, 0);
-
-        if (Input.GetKey(KeyCode.A))
-            transform.Translate(-_currentSpeed, 0, 0);
-
-        if (Input.GetKey(KeyCode.D))
-            transform.Translate(_currentSpeed, 0, 0);
+        Move();
     }
+
+    private void Move()
+    {
+        float yDirection = Input.GetAxis("Vertical");
+        float xDirection = Input.GetAxis("Horizontal");
+
+        float currentSpeed = _speed * Time.deltaTime;
+        Vector3 targetPosition = new Vector3(transform.position.x + xDirection* currentSpeed, transform.position.y + yDirection * currentSpeed);
+        transform.position = targetPosition; 
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.TryGetComponent(out Enemy enemy))
+        {
+            enemy.Die();
+        }
+        else if (collision.TryGetComponent(out Boost boost))
+        {
+            TakeBoost(boost);
+            boost.Taked();
+        }
+    }
+    
+    private void TakeBoost(Boost boost)
+    {
+        StartCoroutine(UseBoost(boost.Acceleration, boost.Duration));
+    }
+
+    private IEnumerator UseBoost(int acceleration,int duration)
+    {
+        _speed += acceleration;
+        yield return new WaitForSeconds(duration);
+        _speed -= acceleration;
+    }
+
 }

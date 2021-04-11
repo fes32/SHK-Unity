@@ -6,10 +6,9 @@ using UnityEngine.Events;
 public class Enemy : MonoBehaviour
 {
     [SerializeField] private float _speed;
-    [SerializeField] private float _distanceToDie;
-
+    
     private Vector3 _targetPosition;
-    private Player _target;
+    private int _moveRadius = 4;
 
     public event UnityAction<Enemy> Dying;
 
@@ -20,27 +19,25 @@ public class Enemy : MonoBehaviour
 
     private void Update()
     {
+        Move();
+    }
+
+    private void Move()
+    {
         transform.position = Vector3.MoveTowards(transform.position, _targetPosition, _speed * Time.deltaTime);
 
         if (transform.position == _targetPosition)
-            _targetPosition = GetRandomTargetPosition();
-
-        if (Vector3.Distance(transform.position, _target.transform.position) < _distanceToDie)
-            Die();
+            _targetPosition = GetRandomTargetPosition();        
     }
 
     private Vector3 GetRandomTargetPosition()
     {
-         return Random.insideUnitCircle * 4;
+         return Random.insideUnitCircle * _moveRadius;
     }
 
     public void Die()
     {  
         Dying?.Invoke(this);
-    }
-
-    public void Spawn(Player player)
-    {
-        _target = player;
+        Destroy(this.gameObject);
     }
 }
